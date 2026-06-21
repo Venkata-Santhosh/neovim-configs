@@ -23,6 +23,10 @@ return {
     { "<leader>fh", "<cmd>Telescope help_tags<CR>",   desc = "Find help docs" },
     { "<leader>fr", "<cmd>Telescope oldfiles<CR>",    desc = "Find recent files" },
     { "<leader>fw", "<cmd>Telescope grep_string<CR>", desc = "Find word under cursor" },
+    -- Search symbols (classes/methods) by NAME across your project AND dependency
+    -- JARs. Picking a result from a library opens jdtls' on-the-fly decompiled
+    -- source — this is the IntelliJ "Search Everywhere / Ctrl+N" equivalent.
+    { "<leader>fs", "<cmd>Telescope lsp_dynamic_workspace_symbols<CR>", desc = "Find symbol in project + libraries" },
     { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Find diagnostics (errors)" },
     { "<leader>fk", "<cmd>Telescope keymaps<CR>",     desc = "Find keymaps" },
     { "<leader><leader>", "<cmd>Telescope find_files<CR>", desc = "Find files (quick)" },
