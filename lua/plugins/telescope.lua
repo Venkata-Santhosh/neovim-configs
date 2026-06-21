@@ -37,6 +37,17 @@ return {
       defaults = {
         path_display = { "truncate" },
         -- Press <C-/> in the picker (insert mode) to see all its shortcuts.
+        --
+        -- Disable treesitter highlighting INSIDE the preview window.
+        -- Telescope 0.1.x's previewer calls the OLD nvim-treesitter `master`-branch
+        -- API (`nvim-treesitter.parsers.ft_to_lang`, `nvim-treesitter.configs`),
+        -- which no longer exists on the `main` branch we use (see plugins/treesitter.lua).
+        -- That mismatch throws `attempt to call field 'ft_to_lang' (a nil value)`.
+        -- Turning it off makes the previewer fall back to Vim's regex/`syntax`
+        -- highlighting, which still looks fine for short preview snippets.
+        preview = {
+          treesitter = false,
+        },
       },
       extensions = {
         ["ui-select"] = { require("telescope.themes").get_dropdown() },
