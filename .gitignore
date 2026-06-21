@@ -1,0 +1,6 @@
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# NOTE: We intentionally COMMIT lazy-lock.json — it pins exact plugin versions
+# so every machine (Linux, Mac) installs identical plugins. Do not ignore it.
