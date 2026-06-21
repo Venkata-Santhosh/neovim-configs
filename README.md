@@ -14,7 +14,8 @@ is a step-by-step playbook — follow it top to bottom on a fresh machine and yo
 
 ## 📑 Table of contents
 1. [What's in here](#-whats-in-here)
-2. [The whole setup in one glance](#-the-whole-setup-in-one-glance)
+2. [Every plugin explained](#-every-plugin-explained)
+3. [The whole setup in one glance](#-the-whole-setup-in-one-glance)
 3. [Step 1 — Install system prerequisites](#-step-1--install-system-prerequisites)
 4. [Step 2 — Install a Nerd Font (fixes `?` icons)](#-step-2--install-a-nerd-font-fixes--icons)
 5. [Step 3 — Set your terminal's font](#-step-3--set-your-terminals-font)
@@ -65,6 +66,107 @@ is a step-by-step playbook — follow it top to bottom on a fresh machine and yo
 **How config loading works:** Neovim reads `init.lua`, which loads `lua/config/*`,
 then lazy.nvim auto-loads **every** file in `lua/plugins/`. To add a plugin later,
 just drop a new `.lua` file in that folder — no other wiring needed.
+
+---
+
+## 🧩 Every plugin explained
+
+Every plugin this config installs, grouped by the file it lives in. "Dependency"
+plugins are pulled in automatically by another plugin — you never call them
+directly, but they're listed so nothing is a mystery.
+
+### Plugin manager — `lua/config/lazy.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **lazy.nvim** (`folke/lazy.nvim`) | The plugin manager. Bootstraps itself on first launch, then downloads, lazy-loads, and version-pins every other plugin (via `lazy-lock.json`). Run `:Lazy` to open its dashboard (`U` update, `S` sync, `restore` to roll back). |
+
+### Theme — `lua/plugins/colorscheme.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **tender.vim** (`jacoborus/tender.vim`) | The warm dark colorscheme. Loaded eagerly with high priority so it's applied before anything else draws. The config also forces a light block cursor so it stays visible on the dark background. |
+
+### Syntax — `lua/plugins/treesitter.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **nvim-treesitter** (`main` branch) | Parses your code into a real syntax tree for accurate, fast highlighting and smart indentation. Compiles a parser per language (`:TSUpdate`); highlighting is started per-buffer via a `FileType` autocmd. We use the `main` branch because the old `master` is frozen and crashes on Neovim 0.12+. |
+
+### Language intelligence (LSP) — `lua/plugins/lsp.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **nvim-lspconfig** (`neovim/nvim-lspconfig`) | Ships ready-made configs for ~300 language servers. This file wires up the on-attach keymaps (`gd`, `gr`, `K`, rename, code action…), diagnostic icons, and per-server settings. |
+| **mason.nvim** (`mason-org/mason.nvim`) | A package manager *inside* Neovim that downloads language servers, formatters, and linters for you. Run `:Mason` to see what's installed. |
+| **mason-lspconfig.nvim** | Bridges Mason's package names to nvim-lspconfig, and auto-enables each server as soon as Mason finishes installing it (avoids the "server not in PATH" error on first run). |
+| **mason-tool-installer.nvim** | Ensures non-LSP tools (here: `prettierd`, `stylua`) are downloaded by Mason too. |
+
+The LSP servers themselves (`ts_ls`, `eslint`, `html`, `cssls`, `tailwindcss`,
+`jsonls`, `emmet_ls`, `bashls`, `yamlls`, `lua_ls`, plus `jdtls` for Java) are
+downloaded by Mason — they're programs, not Neovim plugins.
+
+### Autocomplete — `lua/plugins/completion.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **blink.cmp** (`saghen/blink.cmp`) | The autocomplete popup that appears as you type. Pulls suggestions from the LSP, snippets, buffer words, and file paths. Ships a prebuilt Rust fuzzy matcher (no toolchain needed). `<CR>` or `<C-y>` accepts; inline ghost text previews the top result. |
+| **LuaSnip** (`L3MON4D3/LuaSnip`) | *Dependency.* The snippet engine blink.cmp expands snippets through. |
+| **friendly-snippets** (`rafamadriz/friendly-snippets`) | *Dependency.* A large library of ready-made VSCode-style snippets for many languages, loaded into LuaSnip. |
+
+### Fuzzy finder — `lua/plugins/telescope.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **telescope.nvim** | The fuzzy finder you'll use most: find files (`<leader>ff`), grep across the project (`<leader>fg`), buffers, recent files, symbols, diagnostics, keymaps, help. Powered by system `ripgrep` + `fd`. |
+| **telescope-fzf-native.nvim** | *Dependency.* A compiled C extension (`make`) that makes Telescope's filtering dramatically faster. |
+| **telescope-ui-select.nvim** | *Dependency.* Routes Neovim's generic selection prompts (e.g. LSP code-action menus) through Telescope's nicer UI. |
+| **plenary.nvim** (`nvim-lua/plenary.nvim`) | *Dependency.* A common Lua utility library many plugins (Telescope, neo-tree, gitsigns…) build on. |
+
+### File explorer — `lua/plugins/neo-tree.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **neo-tree.nvim** (`v3.x`) | The VS Code–style file-tree sidebar. Toggle with `<leader>fe`, focus with `<leader>fo`. Follows the current file, auto-refreshes on external changes, and shows hidden/gitignored files. Press `?` inside it for its own keymaps (`a` add, `d` delete, `r` rename). |
+| **nui.nvim** (`MunifTanjim/nui.nvim`) | *Dependency.* The UI-component library neo-tree's windows are built on. |
+| **nvim-web-devicons** (`nvim-tree/nvim-web-devicons`) | *Dependency.* The file-type icons used by neo-tree, the statusline, and Telescope. Needs a Nerd Font (see Step 2). |
+
+### Editor quality-of-life bundle — `lua/plugins/editor.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **lualine.nvim** | The statusline at the bottom (mode, git branch, filename, position). `theme = "auto"` so it matches the colorscheme; one global statusline for all windows. |
+| **which-key.nvim** | Press `<leader>` and pause — a popup menu shows every shortcut. Great for discovery; the config labels the leader groups (Find, Buffer, Code, Git, Markdown, Terminal). |
+| **flash.nvim** | Lightning navigation: press `s` then 2 characters near your target, then the label letter, to teleport the cursor. `S` does a Treesitter-aware structural select. |
+| **gitsigns.nvim** | Shows added/changed/removed lines in the gutter, plus hunk navigation (`]h`/`[h`), preview/reset hunk, and line blame (`<leader>gb`). |
+| **nvim-autopairs** | Auto-closes brackets, quotes, and parentheses as you type. |
+| **indent-blankline.nvim** (`ibl`) | Faint vertical guides showing indentation levels. |
+| **mini.comment** | Filetype-aware commenting (handles JSX/TSX context correctly) layered on Neovim's built-in `gcc` / `gc`. |
+
+### Auto-formatting — `lua/plugins/formatting.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **conform.nvim** (`stevearc/conform.nvim`) | Formats your code on save, picking the right formatter per filetype: `prettierd` for JS/TS/React/CSS/HTML/JSON/Markdown/YAML, `stylua` for Lua. Manual format with `<leader>cF`. Java is formatted by jdtls instead. |
+
+### Java — `lua/plugins/java.lua` (+ `ftplugin/java.lua`)
+
+| Plugin | What it does |
+|--------|--------------|
+| **nvim-jdtls** (`mfussenegger/nvim-jdtls`) | Drives the Eclipse JDT language server (jdtls) with the careful per-project startup Java needs. Loads only for `.java` files; the actual startup runs from `ftplugin/java.lua`. Mason downloads the jdtls server itself. |
+
+### Markdown & Mermaid — `lua/plugins/markdown.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **markdown-preview.nvim** (`iamcco/...`) | Opens a live browser tab that renders your Markdown — and turns ```` ```mermaid ```` blocks into real diagrams. Toggle with `<leader>mp`. The `build` step downloads its preview-server binary. |
+| **render-markdown.nvim** (`MeanderingProgrammer/...`) | Prettifies Markdown *inside* Neovim (headings, tables, checkboxes, code blocks). Toggle with `<leader>mr`. |
+
+### Terminal — `lua/plugins/terminal.lua`
+
+| Plugin | What it does |
+|--------|--------------|
+| **toggleterm.nvim** (`akinsho/toggleterm.nvim`) | A reusable integrated terminal you pop open/closed with `Ctrl+\`. Also `<leader>tf` (float), `<leader>th` (below), `<leader>tv` (right). Leave terminal insert mode with `<Esc><Esc>`. |
 
 ---
 
