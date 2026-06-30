@@ -97,6 +97,34 @@ return {
       },
     })
 
+    -- gopls: the official Go language server. Settings enable extra static
+    -- analysis (staticcheck), auto-import of unimported packages, and inlay
+    -- hints — matching the "batteries included" feel of the VS Code Go plugin.
+    vim.lsp.config("gopls", {
+      settings = {
+        gopls = {
+          gofumpt = true,            -- stricter gofmt formatting
+          completeUnimported = true, -- suggest + auto-import packages you haven't imported yet
+          usePlaceholders = true,    -- fill function arguments as snippet placeholders
+          staticcheck = true,        -- extra lint diagnostics (staticcheck.io)
+          analyses = {
+            unusedparams = true,
+            unusedwrite = true,
+            nilness = true,
+            useany = true,
+          },
+          hints = {                  -- inlay hints (the greyed-in type/param names)
+            assignVariableTypes = true,
+            compositeLiteralFields = true,
+            constantValues = true,
+            functionTypeParameters = true,
+            parameterNames = true,
+            rangeVariableTypes = true,
+          },
+        },
+      },
+    })
+
     -- emmet_ls: expand HTML/CSS abbreviations (also useful in JSX/TSX).
     vim.lsp.config("emmet_ls", {
       filetypes = {
@@ -123,6 +151,7 @@ return {
       "emmet_ls",    -- Emmet abbreviations
       "bashls",      -- Bash / shell scripts
       "yamlls",      -- YAML
+      "gopls",       -- Go
     }
 
     -- mason-lspconfig: ensure the above are downloaded, and AUTO-ENABLE each one
@@ -139,6 +168,8 @@ return {
       ensure_installed = {
         "prettierd", -- fast formatter for JS/TS/React/CSS/HTML/JSON/Markdown/YAML
         "stylua",    -- Lua formatter
+        "goimports", -- Go: format + auto add/remove imports
+        "gofumpt",   -- Go: stricter gofmt
       },
     })
   end,

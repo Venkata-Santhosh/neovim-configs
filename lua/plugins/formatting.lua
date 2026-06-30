@@ -31,6 +31,8 @@ return {
       html = { "prettierd" },
       yaml = { "prettierd" },
       markdown = { "prettierd" },
+      -- Go: goimports formats AND fixes the import block; gofumpt tightens style.
+      go = { "goimports", "gofumpt" },
       -- Java is formatted by the jdtls language server itself (see java.lua),
       -- so we leave it out here.
     },

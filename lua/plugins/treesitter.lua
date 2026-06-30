@@ -23,6 +23,7 @@ return {
       "javascript", "typescript", "tsx",         -- React stack (javascript covers .jsx)
       "html", "css", "scss", "json", "jsonc",
       "java",                                     -- Java
+      "go", "gomod", "gosum", "gowork",           -- Go (module/sum/workspace files too)
       "bash", "markdown", "markdown_inline",      -- markdown_inline = code inside .md
       "yaml", "toml", "dockerfile", "gitignore", "regex",
     }
@@ -42,7 +43,12 @@ return {
         end
         pcall(vim.treesitter.start, buf, lang)
         -- Treesitter-based indentation (experimental on the main branch).
-        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        -- Skip markdown: its tree doesn't understand code inside ``` fences, so
+        -- the treesitter indenter fights you there. ftplugin/markdown.lua instead
+        -- uses simple autoindent (continue the previous line's indent + Tab to nest).
+        if ft ~= "markdown" then
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
       end,
     })
   end,
